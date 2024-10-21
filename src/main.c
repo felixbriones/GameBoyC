@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include "emu.h"
+#include "gb.h"
 #include "graphics.h"
 
 int main(int argc, char** argv)
@@ -8,6 +9,7 @@ int main(int argc, char** argv)
 	SDL_Event sEvent;
 	SDL_Window* sWindow = NULL;
 	SDL_Renderer* sRenderer = NULL;
+	gameBoy_t gb;
 
 	// TODO: Add function for loading a ROM and determining if it valid
 	if (argc != 2)
@@ -28,6 +30,10 @@ int main(int argc, char** argv)
 		if(getEmuContext()->paused)
 		{
 		}
+		// I've decide on using function table (jump table) (array of function pointers) for dispatching
+		// Temp: For testing the dispatch for now. Replace w/ proper logic
+		gb.opCode = 0x0;
+		gbHandleCycle(&gb);	
 	}
 
 	return 0;

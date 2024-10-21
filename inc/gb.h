@@ -69,3 +69,5 @@ typedef struct
 	uint8_t opCode;
 
 } gameBoy_t;
+
+void gbHandleCycle(gameBoy_t* gb);
