@@ -10,3 +10,6 @@ typedef struct
 
 // Function prototypes
 emuContext_t* getEmuContext();
+void setEmuContextPaused(bool newVal);
+void setEmuContextRunning(bool newVal);
+void setEmuContextTicks(uint64_t newVal);
