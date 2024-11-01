@@ -62,12 +62,14 @@ typedef struct
 	// Can be paired for 16-bit operations: (AF, BC, DE, HL)
 	cpuReg_t generalReg;
 	
+	// Increments by 1
+	uint64_t cyclesCurrent;
+	// Will be used to ensure we 
+	uint64_t cyclesTarget;
 	// Special Purpose Registers: (F)lags, Program Counter, Stack Pointer
 	uint16_t pc;
 	uint16_t sp;	
-	
 	uint8_t opCode;
-
 } gameBoy_t;
 
 void gbHandleCycle(gameBoy_t* gb);
