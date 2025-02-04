@@ -10,6 +10,11 @@
 // different registers. Best way to handle this is to pass a pointer to the entire CPU
 typedef void gbOpCode (gameBoy_t* gb);
 
+typedef struct gbInstruction
+{
+	gbOpCode* operation;
+	uint8_t clockCycles;
+};
 
 void invalid(gameBoy_t* gb)
 {
@@ -39,19 +44,11 @@ void opLD_0x02(gameBoy_t* gb)
 	printf("SUB Executed\r\n");
 }
 
-gbOpCode* gbDispatchTable[GB_NUM_OF_OPCODES] =
+struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 {
-	opNOP_0x00, // NOP
-	opLD_0x01,  // LD BC, d16
-	opLD_0x02,  // LD (BC), A
-};
-
-// Keeps track of required cycles required by each opcode
-uint8_t gbOpcodeExecutionTime [512] =
-{
-	4,  // NOP (0x00)
-	12, // LD  (0x01)	
-	8,  // LD  (0x02)
+	{ opNOP_0x00, 4 },   // NOP
+	{ opLD_0x01,  12 },  // LD BC, d16
+	{ opLD_0x02,  8 }    // LD (BC), A
 };
 
 void gbHandleCycle(gameBoy_t* gb)
@@ -62,11 +59,11 @@ void gbHandleCycle(gameBoy_t* gb)
 	if(gb->cyclesCurrent == gb->cyclesTarget)
 	{
 		// Execute operation
-		gbDispatchTable[gb->opCode](gb);
+		gbDispatchTable[gb->opCode].operation(gb);
 		// Different opcodes have different lengths. Increment PC by length of most recent operation
-		gb->pc+= gbOpcodeExecutionTime[gb->opCode];
+		//gb->pc+= getOpCodeLength(gb->opCode);
 		// Set cyclesTarget so we know when to move on
-		gb->cyclesTarget = gb->cyclesCurrent + gbOpcodeExecutionTime[gb->opCode];
+		gb->cyclesTarget = gb->cyclesCurrent + gbDispatchTable[gb->opCode].clockCycles;
 	}
 
 	gb->cyclesCurrent++;
