@@ -5,17 +5,6 @@
 
 //gb.c: opcodes/registers related to the GameBoy. emu.c: logic related specifically to emulation such as pausing/resuming execution
 
-// Define generalized opcode function data type which will be used to take one of many opcode functions at a time
-// Each function in function table needs to have the same function signature, but different opcodes interact with
-// different registers. Best way to handle this is to pass a pointer to the entire CPU
-typedef void gbOpCode (gameBoy_t* gb);
-
-typedef struct gbInstruction
-{
-	gbOpCode* operation;
-	uint8_t clockCycles;
-};
-
 void invalid(gameBoy_t* gb)
 {
 	printf("Invalid opcode: %#04x\r\n");
@@ -44,11 +33,16 @@ void opLD_0x02(gameBoy_t* gb)
 	printf("SUB Executed\r\n");
 }
 
+/*
+ * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
+ * @details Contains the following data: { function pointer, cycles required, size of op code in bytes }
+ */
 struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 {
-	{ opNOP_0x00, 4 },   // NOP
-	{ opLD_0x01,  12 },  // LD BC, d16
-	{ opLD_0x02,  8 }    // LD (BC), A
+//	{ function,     cycles,  size } 
+	{ opNOP_0x00,   4,       1    },  // NOP
+	{ opLD_0x01,    12,      3    },  // LD BC, d16
+	{ opLD_0x02,    8,       1    },  // LD (BC), A
 };
 
 void gbHandleCycle(gameBoy_t* gb)
@@ -61,7 +55,7 @@ void gbHandleCycle(gameBoy_t* gb)
 		// Execute operation
 		gbDispatchTable[gb->opCode].operation(gb);
 		// Different opcodes have different lengths. Increment PC by length of most recent operation
-		//gb->pc+= getOpCodeLength(gb->opCode);
+		gb->pc+= gbDispatchTable[gb->opCode].opCodeSize * 8;
 		// Set cyclesTarget so we know when to move on
 		gb->cyclesTarget = gb->cyclesCurrent + gbDispatchTable[gb->opCode].clockCycles;
 	}

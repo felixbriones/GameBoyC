@@ -72,4 +72,16 @@ typedef struct
 	uint8_t opCode;
 } gameBoy_t;
 
+// Define generalized opcode function data type which will be used to take one of many opcode functions at a time
+// Each function in function table needs to have the same function signature, but different opcodes interact with
+// different registers. Best way to handle this is to pass a pointer to the entire CPU
+typedef void gbOpCode (gameBoy_t* gb);
+
+typedef struct gbInstruction
+{
+	gbOpCode* operation;
+	uint8_t clockCycles;
+	uint8_t opCodeSize;
+};
+
 void gbHandleCycle(gameBoy_t* gb);
