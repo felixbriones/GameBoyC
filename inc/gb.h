@@ -1,9 +1,11 @@
 #include <stdint.h>
 
-#define FLAG_REG_ZERO  	    (1 << 7) //
+#define FLAG_REG_ZERO  	    (1 << 7)
 #define FLAG_REG_SUB  	    (1 << 6)
 #define FLAG_REG_HALF_CARRY (1 << 5)
 #define FLAG_REG_CARRY 	    (1 << 4)
+
+#define GB_MEMORY_SIZE 	    0x10000
 
 // GameBoy bootROM starts at memory address 0x0
 // Cartridge ROM loaded into memory address 0x0100
@@ -70,6 +72,8 @@ typedef struct
 	uint16_t pc;
 	uint16_t sp;	
 	uint8_t opCode;
+	// The Gameboy has 64KB of addressable memory (65535 bytes)
+	uint8_t memory [GB_MEMORY_SIZE];
 } gameBoy_t;
 
 // Define generalized opcode function data type which will be used to take one of many opcode functions at a time
