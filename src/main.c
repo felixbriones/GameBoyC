@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
+#include "cart.h"
 #include "emu.h"
 #include "gb.h"
 #include "graphics.h"
@@ -18,6 +19,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	cartLoadRom(&gb, argv[1]);
 	graphicsInit(&sWindow, &sRenderer);
 	
 	// Initialize Emulator context

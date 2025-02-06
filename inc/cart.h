@@ -1,4 +1,4 @@
-
+#include "gb.h"
 
 // Memory map
 #define ADDR_ENTRY_START  	0x0100
@@ -21,4 +21,5 @@
 #define ADDR_ROM_VERSION_NUMBER 0x014C // Used to specify version number of the game
 #define ADDR_HEADER_CHECKSUM    0x014D // Contains checksum computed from 0x0134 - 0x014C. Boot ROM will lock if checksum fails
 
-
+// Function prototypes
+void cartLoadRom(gameBoy_t* gb, const char* gameRom);
