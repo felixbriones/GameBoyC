@@ -167,6 +167,63 @@ void opLD_0x16(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Load instruction (0x1A): LD A,(DE)
+ * @details Loads value pointed to register DE to register A
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opLD_0x1A(gameBoy_t* gb)
+{
+	printf("LD 0x1A Executed\r\n"); 
+	uint8_t value = gb->memory[gb->generalReg.de];
+	gb->generalReg.a = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x1E): LD E,d8
+ * @details Loads 8-bit value into register E
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8 cycles to execute
+ */
+void opLD_0x1E(gameBoy_t* gb)
+{
+	printf("LD 0x1E Executed\r\n"); 
+	uint8_t value = gb->memory[gb->pc + 1];
+	gb->generalReg.e = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x21): LD HL, d16
+ * @details Loads 16-bit value into register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 3 bytes long and requires 12 cycles to execute
+ */
+void opLD_0x21(gameBoy_t* gb)
+{
+	printf("LD 0x21 Executed\r\n"); 
+	uint16_t value = gb->memory[gb->pc + 1] | gb->memory[gb->pc + 2];
+	gb->generalReg.hl = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x22): LD (HL+),A
+ * @details Stores the value of register A into register HL. HL is then incremented by 1
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 3 bytes long and requires 8 cycles to execute
+ */
+void opLD_0x22(gameBoy_t* gb)
+{
+	printf("LD 0x22 Executed\r\n"); 
+	uint16_t value = gb->generalReg.a;
+	gb->generalReg.hl = value;
+	gb->generalReg.hl++;
+}
+
+/*
  * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
  * @details Contains the following data: { function pointer, cycles required, size of op code in bytes }
  */
@@ -183,6 +240,10 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opLD_0x11,    12,      3    },  // LD DE, d16
 	{ opLD_0x12,    8,       1    },  // LD (DE), A
 	{ opLD_0x16,    8,       2    },  // LD D, d8
+	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
+	{ opLD_0x1E,    8,       2    },  // LD E,d8
+	{ opLD_0x21,    12,      3    },  // LD HL, d16
+	{ opLD_0x22,    8,       1    },  // LD (HL+),A
 };
 
 /*
