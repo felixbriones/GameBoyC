@@ -110,7 +110,7 @@ void opLD_0x0A(gameBoy_t* gb)
 }
 
 /*
- * @brief Op code function for Load instruction (0x0A): LD C, d8 
+ * @brief Op code function for Load instruction (0x0E): LD C, d8 
  * @details Loads the 8-bit value to register C
  * @param Pointer to gb struct containing registers
  * @return void
@@ -121,6 +121,49 @@ void opLD_0x0E(gameBoy_t* gb)
 	printf("LD 0x0E Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.c = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x11): LD DE, d16
+ * @details Loads 16-bit value into register DE
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 3 bytes long and requires 12 cycles to execute
+ */
+void opLD_0x11(gameBoy_t* gb)
+{
+	printf("LD 0x11 Executed\r\n"); 
+	uint16_t value = gb->memory[gb->pc + 1] | gb->memory[gb->pc + 2] << 8;
+	gb->generalReg.de = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x12): LD (DE), A
+ * @details Loads value from register A to memory address specified by register DE
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opLD_0x12(gameBoy_t* gb)
+{
+	printf("LD 0x12 Executed\r\n"); 
+	uint8_t value = gb->generalReg.a;
+	uint16_t memAddr = gb->generalReg.de;
+	gb->memory[memAddr] = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x16): LD D, d8
+ * @details Loads 8-bit value into register D
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8 cycles to execute
+ */
+void opLD_0x16(gameBoy_t* gb)
+{
+	printf("LD 0x16 Executed\r\n"); 
+	uint8_t value = gb->memory[gb->pc + 1];
+	gb->generalReg.d = value;
 }
 
 /*
@@ -137,6 +180,9 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opLD_0x08,    20,      3    },  // LD (a16), SP
 	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
 	{ opLD_0x0E,    8,       2    },  // LD C, d8 
+	{ opLD_0x11,    12,      3    },  // LD DE, d16
+	{ opLD_0x12,    8,       1    },  // LD (DE), A
+	{ opLD_0x16,    8,       2    },  // LD D, d8
 };
 
 /*

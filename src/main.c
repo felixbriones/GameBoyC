@@ -33,8 +33,6 @@ int main(int argc, char** argv)
 		{
 		}
 		// I've decide on using function table (jump table) (array of function pointers) for dispatching
-		// Temp: For testing the dispatch for now. Replace w/ proper logic
-		gb.opCode = 0x0;
 		gbHandleCycle(&gb);	
 	}
 
