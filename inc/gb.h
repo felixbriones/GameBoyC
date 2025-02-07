@@ -74,7 +74,6 @@ typedef struct
 	// Special Purpose Registers: (F)lags, Program Counter, Stack Pointer
 	uint16_t pc;
 	uint16_t sp;	
-	uint8_t opCode;
 	// The Gameboy has 64KB of addressable memory (65535 bytes)
 	uint8_t memory [GB_MEMORY_SIZE];
 } gameBoy_t;

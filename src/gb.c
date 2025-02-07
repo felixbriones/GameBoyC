@@ -6,6 +6,14 @@
 //gb.c: opcodes/registers related to the GameBoy. emu.c: logic related specifically to emulation such as pausing/resuming execution
 
 /*
+ * @brief Helper function which returns the op code currently being pointed to by the Program Counter
+ */
+uint16_t gbGetOpCode(gameBoy_t* gb)
+{
+	return gb->memory[gb->pc];	
+}
+
+/*
  * @brief Handles invalid or unknown opcodes and prints it
  * @param Pointer to gb struct containing registers
  * @return void
@@ -114,6 +122,7 @@ void opLD_0x0E(gameBoy_t* gb)
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.c = value;
 }
+
 /*
  * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
  * @details Contains the following data: { function pointer, cycles required, size of op code in bytes }
@@ -139,17 +148,17 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
  */
 void gbHandleCycle(gameBoy_t* gb)
 {
-	printf("Handling a cycle on the gameBoy");
-		
+	uint16_t currentOpCode = 0;
 	// If the execution time for the current operation has elapsed, move on to the next
 	if(gb->cyclesCurrent == gb->cyclesTarget)
 	{
+		currentOpCode = gbGetOpCode(gb);
 		// Execute operation
-		gbDispatchTable[gb->opCode].operation(gb);
+		gbDispatchTable[currentOpCode].operation(gb);
 		// Different opcodes have different lengths. Increment PC by length of most recent operation in bytes
-		gb->pc+= gbDispatchTable[gb->opCode].opCodeSize;
+		gb->pc+= gbDispatchTable[currentOpCode].opCodeSize;
 		// Set cyclesTarget so we know when to move on
-		gb->cyclesTarget = gb->cyclesCurrent + gbDispatchTable[gb->opCode].clockCycles;
+		gb->cyclesTarget = gb->cyclesCurrent + gbDispatchTable[currentOpCode].clockCycles;
 	}
 
 	gb->cyclesCurrent++;
