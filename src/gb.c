@@ -65,6 +65,93 @@ void opLD_0x02(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Increment instruction (0x03): INC BC
+ * @details Increments the value in register BC
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opINC_0x03(gameBoy_t* gb)
+{
+	printf("INC 0x03 Executed\r\n"); 
+	gb->generalReg.bc++;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x04): INC B
+ * @details Increments the value in register B
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x04(gameBoy_t* gb)
+{
+	printf("INC 0x04 Executed\r\n"); 
+	gb->generalReg.b++;
+
+	// Set Z if result is 0
+	if(gb->generalReg.b == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+	
+	// Incrementing. Clear N
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+
+	// Set if borrow from bit 3
+	if((gb->generalReg.b & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x04): DEC B
+ * @details Decrements the value in register B
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opDEC_0x05(gameBoy_t* gb)
+{
+	printf("DEC 0x05 Executed\r\n"); 
+	gb->generalReg.b--;
+
+	// Set Z if result is 0
+	if(gb->generalReg.b == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+	
+	// Decrementing. Set N
+	gb->generalReg.f |= FLAG_REG_SUB;
+
+	// Set if borrow from bit 4
+	if((gb->generalReg.b & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+}
+
+/*
  * @brief Op code function for Load instruction (0x06): LD B, d8
  * @details Loads 8-bit immediate value into register B
  * @param Pointer to gb struct containing registers
@@ -233,6 +320,9 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opNOP_0x00,   4,       1    },  // NOP
 	{ opLD_0x01,    12,      3    },  // LD BC, d16
 	{ opLD_0x02,    8,       1    },  // LD (BC), A
+	{ opINC_0x03,   8,       1    },  // INC BC 
+	{ opINC_0x04,   4,       1    },  // INC B
+	{ opDEC_0x05,   4,       1    },  // DEC B
 	{ opLD_0x06,    8,       2    },  // LD B, d8
 	{ opLD_0x08,    20,      3    },  // LD (a16), SP
 	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
