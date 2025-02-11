@@ -212,6 +212,45 @@ void opLD_0x08(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Add instruction (0x09): ADD HL, BC
+ * @details Adds the value of register BC to register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 bytes long and requires 8 cycles to execute
+ * @note Affects (N)Sub, (H)alf Carry, and (C)arry flags
+ */
+void opADD_0x09(gameBoy_t* gb)
+{
+	printf("ADD 0x09 Executed\r\n"); 
+	uint16_t value = gb->generalReg.bc;
+
+	// Set H if overflow from bit 11
+	if((gb->generalReg.hl & 0xFFF) + (value & 0xFFF) > 0xFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set C if overflow from bit 15
+	if((uint32_t)gb->generalReg.hl + (uint32_t)value > 0xFFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}
+
+	gb->generalReg.hl += value;	
+
+	// Set N flag to 0
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
  * @brief Op code function for Load instruction (0x0A): LD A, (BC) 
  * @details Loads the value from a memory address specified by BC to register A
  * @param Pointer to gb struct containing registers
@@ -471,6 +510,7 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opLD_0x06,    8,       2    },  // LD B, d8
 	{ opRLCA_0x07,  4,       1    },  // RLCA
 	{ opLD_0x08,    20,      3    },  // LD (a16), SP
+	{ opADD_0x09,   8,       1    },  // ADD HL, BC
 	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
 	{ opDEC_0x0B,   8,       1    },  // DEC BC 
 	{ opINC_0x0C,   4,       1    },  // INC C 
