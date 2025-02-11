@@ -175,6 +175,7 @@ void opLD_0x06(gameBoy_t* gb)
  */
 void opRLCA_0x07(gameBoy_t* gb)
 {
+	printf("RLCA 0x07 Executed\r\n"); 
 	uint8_t carry = 0x00;
 
 	// Set C flag if bit 7 is set
@@ -219,9 +220,97 @@ void opLD_0x08(gameBoy_t* gb)
  */
 void opLD_0x0A(gameBoy_t* gb)
 {
-	printf("LD 0x08 Executed\r\n"); 
+	printf("LD 0x0A Executed\r\n"); 
 	uint8_t value = gb->memory[gb->generalReg.bc];
 	gb->generalReg.a = value;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x0B): DEC BC
+ * @details Decrements the value in register BC
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opDEC_0x0B(gameBoy_t* gb)
+{
+	printf("DEC 0x0B Executed\r\n"); 
+	gb->generalReg.b--;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x0C): INC C
+ * @details Increments the value in register C
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, (H)alf Carry flags
+ */
+void opINC_0x0C(gameBoy_t* gb)
+{
+	printf("INC 0x0C Executed\r\n"); 
+	gb->generalReg.c++;
+
+	// Set if overflow from bit 3
+	if((gb->generalReg.c & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;		
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;		
+	}
+	
+	// Set if result equals 0
+	if(gb->generalReg.c == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;		
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;		
+	}
+
+	// Clear flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;		
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x0D): DEC C
+ * @details Increments the value in register C
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, (H)alf Carry flags
+ */
+void opDEC_0x0D(gameBoy_t* gb)
+{
+	printf("DEC 0x0D Executed\r\n"); 
+
+	gb->generalReg.c--;
+	
+	// Set if borrow from bit 4
+	if((gb->generalReg.c & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;		
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;		
+	}
+	
+	// Set if result equals 0
+	if(gb->generalReg.c == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;		
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;		
+	}
+
+	// Set flag
+	gb->generalReg.f |= FLAG_REG_SUB;
 }
 
 /*
@@ -383,6 +472,9 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opRLCA_0x07,  4,       1    },  // RLCA
 	{ opLD_0x08,    20,      3    },  // LD (a16), SP
 	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
+	{ opDEC_0x0B,   8,       1    },  // DEC BC 
+	{ opINC_0x0C,   4,       1    },  // INC C 
+	{ opDEC_0x0D,   4,       1    },  // DEC C 
 	{ opLD_0x0E,    8,       2    },  // LD C, d8 
 	{ opRRCA_0x0F,  4,       1    },  // RRCA
 	{ opLD_0x11,    12,      3    },  // LD DE, d16
