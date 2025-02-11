@@ -166,6 +166,34 @@ void opLD_0x06(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Rotate Left instruction (0x07): RLCA
+ * @details Shift bits left in register A by 1. bit 7 is shifted to C flag and bit 0
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, (H)alf Carry, and (C)arry flags
+ */
+void opRLCA_0x07(gameBoy_t* gb)
+{
+	uint8_t carry = 0x00;
+
+	// Set C flag if bit 7 is set
+	if((gb->generalReg.a & 0x80) == 0x80)
+	{
+		carry = 0x01;
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	
+	// Shift left by 1
+	gb->generalReg.a = (gb->generalReg.a << 1) | carry;
+
+	// Clear the Z, N, and H flags
+	gb->generalReg.f &= ~FLAG_REG_ZERO;
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+}
+
+/*
  * @brief Op code function for Load instruction (0x08): LD (a16), SP
  * @details Loads the stack pointer into a 16-bit memory address
  * @param Pointer to gb struct containing registers
@@ -208,6 +236,34 @@ void opLD_0x0E(gameBoy_t* gb)
 	printf("LD 0x0E Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.c = value;
+}
+
+/*
+ * @brief Op code function for Rotate Right instruction (0x0F): RRCA
+ * @details Shift bits right in register A by 1. bit 0 is shifted to C flag and bit 7
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, (H)alf Carry, and (C)arry flags
+ */
+void opRRCA_0x0F(gameBoy_t* gb)
+{
+	uint8_t carry = 0x00;
+
+	// Set C flag if bit 0 is set
+	if((gb->generalReg.a & 0x01) == 0x01)
+	{
+		carry = 0x80;
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	
+	// Shift left by 1
+	gb->generalReg.a = (gb->generalReg.a >> 1) | carry;
+
+	// Clear the Z, N, and H flags
+	gb->generalReg.f &= ~FLAG_REG_ZERO;
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
 /*
@@ -324,9 +380,11 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x04,   4,       1    },  // INC B
 	{ opDEC_0x05,   4,       1    },  // DEC B
 	{ opLD_0x06,    8,       2    },  // LD B, d8
+	{ opRLCA_0x07,  4,       1    },  // RLCA
 	{ opLD_0x08,    20,      3    },  // LD (a16), SP
 	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
 	{ opLD_0x0E,    8,       2    },  // LD C, d8 
+	{ opRRCA_0x0F,  4,       1    },  // RRCA
 	{ opLD_0x11,    12,      3    },  // LD DE, d16
 	{ opLD_0x12,    8,       1    },  // LD (DE), A
 	{ opLD_0x16,    8,       2    },  // LD D, d8
