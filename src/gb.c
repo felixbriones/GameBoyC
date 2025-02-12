@@ -394,6 +394,12 @@ void opRRCA_0x0F(gameBoy_t* gb)
 	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
+// TODO: Research and implement STOP functionality 
+void opSTOP_0x10(gameBoy_t* gb)
+{
+	printf("STOP 0x10 Executed\r\n"); 
+}
+
 /*
  * @brief Op code function for Load instruction (0x11): LD DE, d16
  * @details Loads 16-bit value into register DE
@@ -421,6 +427,95 @@ void opLD_0x12(gameBoy_t* gb)
 	uint8_t value = gb->generalReg.a;
 	uint16_t memAddr = gb->generalReg.de;
 	gb->memory[memAddr] = value;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x13): INC DE
+ * @details Increments the value in register DE
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opINC_0x13(gameBoy_t* gb)
+{
+	printf("INC 0x13 Executed\r\n"); 
+	gb->generalReg.de++;	
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x14): INC D
+ * @details Increments the value in register D
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x14(gameBoy_t* gb)
+{
+	printf("INC 0x14 Executed\r\n"); 
+	
+	gb->generalReg.d++;
+
+	// Set Z flag if result is 0
+	if(gb->generalReg.d == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H flag if overflow from bit 3
+	if((gb->generalReg.d & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x15): DEC D
+ * @details Decrements the value in register D
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opDEC_0x15(gameBoy_t* gb)
+{
+	printf("DEC 0x15 Executed\r\n"); 
+	
+	gb->generalReg.d--;
+
+	// Set Z flag if result is 0
+	if(gb->generalReg.d == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H flag if borrow from bit 4
+	if((gb->generalReg.d & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f |= FLAG_REG_SUB;
 }
 
 /*
@@ -517,8 +612,12 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x0D,   4,       1    },  // DEC C 
 	{ opLD_0x0E,    8,       2    },  // LD C, d8 
 	{ opRRCA_0x0F,  4,       1    },  // RRCA
+	{ opSTOP_0x10,  4,       2    },  // STOP d8
 	{ opLD_0x11,    12,      3    },  // LD DE, d16
 	{ opLD_0x12,    8,       1    },  // LD (DE), A
+	{ opINC_0x13,   8,       1    },  // INC DE
+	{ opINC_0x14,   4,       1    },  // INC D
+	{ opDEC_0x15,   4,       1    },  // DEC D
 	{ opLD_0x16,    8,       2    },  // LD D, d8
 	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
 	{ opLD_0x1E,    8,       2    },  // LD E,d8
