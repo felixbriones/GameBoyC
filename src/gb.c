@@ -532,6 +532,34 @@ void opLD_0x16(gameBoy_t* gb)
 	gb->generalReg.d = value;
 }
 
+// Rotate register A left, through the carry flag (b7 -> C, C -> b0)
+void opRLA_0x17(gameBoy_t* gb)
+{
+	printf("RLA 0x17 Executed\r\n"); 
+
+	uint8_t carry = 0x00;
+
+	// Save the carry to be moved to bit 0
+	carry = (gb->generalReg.f & FLAG_REG_CARRY) ? 1 : 0;
+
+	// Shift bit 7 to carry register
+	if((gb->generalReg.a & 0x80) == 0x80)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}	
+
+	// Shift register A left 1
+	gb->generalReg.a = (gb->generalReg.a << 1) | carry;
+
+	gb->generalReg.f &= ~FLAG_REG_ZERO;
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+}
+
 /*
  * @brief Op code function for Load instruction (0x1A): LD A,(DE)
  * @details Loads value pointed to register DE to register A
@@ -558,6 +586,34 @@ void opLD_0x1E(gameBoy_t* gb)
 	printf("LD 0x1E Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.e = value;
+}
+
+// Rotate register A right, through the carry flag ( C -> b7, b0 -> C)
+void opRRA_0x1F(gameBoy_t* gb)
+{
+	printf("RRA 0x1F Executed\r\n"); 
+
+	uint8_t carry = 0x00;
+	
+	// Save the old carry
+	carry = (gb->generalReg.f & FLAG_REG_CARRY) ? 0x80 : 0x00;
+
+	// Move bit 0 to carry
+	if((gb->generalReg.a & 0x01) == 0x01)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}
+	
+	// Shift bits right	
+	gb->generalReg.a = (gb->generalReg.a >> 1) | carry;
+
+	gb->generalReg.f &= ~FLAG_REG_ZERO;
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
 /*
@@ -619,8 +675,10 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x14,   4,       1    },  // INC D
 	{ opDEC_0x15,   4,       1    },  // DEC D
 	{ opLD_0x16,    8,       2    },  // LD D, d8
+	{ opRLA_0x17,   4,       1    },  // RLA
 	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
 	{ opLD_0x1E,    8,       2    },  // LD E,d8
+	{ opRRA_0x1F,   4,       1    },  // RRA
 	{ opLD_0x21,    12,      3    },  // LD HL, d16
 	{ opLD_0x22,    8,       1    },  // LD (HL+),A
 };
