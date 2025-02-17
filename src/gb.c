@@ -532,7 +532,14 @@ void opLD_0x16(gameBoy_t* gb)
 	gb->generalReg.d = value;
 }
 
-// Rotate register A left, through the carry flag (b7 -> C, C -> b0)
+/*
+ * @brief Op code function for Load instruction (0x17): RLA
+ * @details Rotate register A left, through the carry flag (b7 -> C, C -> b0)
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, (H)alf Carry, and (C)arry flags
+ */
 void opRLA_0x17(gameBoy_t* gb)
 {
 	printf("RLA 0x17 Executed\r\n"); 
@@ -560,7 +567,6 @@ void opRLA_0x17(gameBoy_t* gb)
 	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
-// Relative Jump: 
 /*
  * @brief Op code function for Relative Jump instruction (0x18): JR r8
  * @details Unconditional relative jump by adding 8-bit offset to PC
@@ -568,12 +574,51 @@ void opRLA_0x17(gameBoy_t* gb)
  * @return void
  * @note This instruction is 2 bytes long and requires 12 cycles to execute
  */
-void opJR_0x18(gameBoy_t* gb) // JR r8
+void opJR_0x18(gameBoy_t* gb)
 {
 	printf("JR 0x18 Executed\r\n"); 
 	int8_t offset = (int8_t)gb->memory[pc + 1];
 
 	gb->pc += offset;
+}
+
+/*
+ * @brief Op code function for Add instruction (0x19): ADD HL, DE
+ * @details Add the value in register DE to register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ * @note Affects (N)Sub, (H)alf Carry, (C)arry flags
+ */
+void opADD_0x19(gameBoy_t* gb) 
+{
+	printf("ADD 0x19 Executed\r\n"); 
+	uint16_t value = 0;
+	value = gb->generalReg.de;
+
+	// Set H if overflow from bit 11 // Incorrect - this works for inc not add
+	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF )
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set C if overflow from bit 15
+	if(((uint32_t)gb->generalReg.hl + (uint32_t)value) > 0xFFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gb->generalReg.hl += value;
 }
 
 /*
