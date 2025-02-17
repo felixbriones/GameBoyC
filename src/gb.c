@@ -575,6 +575,93 @@ void opLD_0x1A(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Decrement instruction (0x1B): DEC DE
+ * @details Decrements the value in register DE
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opDEC_0x1B(gameBoy_t* gb)  // DEC DE
+{
+	printf("DEC 0x1B Executed\r\n"); 
+	gb->generalReg.de--;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x1C): INC E
+ * @details Increment the value in register E
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x1C(gameBoy_t* gb)
+{
+	printf("INC 0x1C Executed\r\n"); 
+	gb->generalReg.e++;
+	
+	// Set Z if result is 0
+	if(gb->generalReg.e == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H if overflow from bit 3
+	if((gb->generalReg.e & 0xF) == 0x0)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+	
+	// Clear the register
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x1D): DEC E
+ * @details Decrement the value in register E
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opDEC_0x1D(gameBoy_t* gb)
+{
+	printf("DEC 0x1D Executed\r\n"); 
+	gb->generalReg.e--;
+
+	// Set Z if result is 0
+	if(gb->generalReg.e == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H if borrow from bit 4
+	if((gb->generalReg.e & 0xF) == 0xF)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+	
+	// Set the flag
+	gb->generalReg.f |= FLAG_REG_SUB;
+}
+
+/*
  * @brief Op code function for Load instruction (0x1E): LD E,d8
  * @details Loads 8-bit value into register E
  * @param Pointer to gb struct containing registers
@@ -588,7 +675,14 @@ void opLD_0x1E(gameBoy_t* gb)
 	gb->generalReg.e = value;
 }
 
-// Rotate register A right, through the carry flag ( C -> b7, b0 -> C)
+// 
+/*
+ * @brief Op code function for Rotate Right instruction (0x1F): RRA
+ * @details Rotate register A right, through the carry flag ( C -> b7, b0 -> C)
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ */
 void opRRA_0x1F(gameBoy_t* gb)
 {
 	printf("RRA 0x1F Executed\r\n"); 
@@ -677,6 +771,9 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opLD_0x16,    8,       2    },  // LD D, d8
 	{ opRLA_0x17,   4,       1    },  // RLA
 	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
+	{ opDEC_0x1B,   8,       1    },  // DEC DE
+	{ opINC_0x1C,   4,       1    },  // INC E
+	{ opDEC_0x1D,   4,       1    },  // DEC E
 	{ opLD_0x1E,    8,       2    },  // LD E,d8
 	{ opRRA_0x1F,   4,       1    },  // RRA
 	{ opLD_0x21,    12,      3    },  // LD HL, d16
