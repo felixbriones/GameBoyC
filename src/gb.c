@@ -560,6 +560,22 @@ void opRLA_0x17(gameBoy_t* gb)
 	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
+// Relative Jump: 
+/*
+ * @brief Op code function for Relative Jump instruction (0x18): JR r8
+ * @details Unconditional relative jump by adding 8-bit offset to PC
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 12 cycles to execute
+ */
+void opJR_0x18(gameBoy_t* gb) // JR r8
+{
+	printf("JR 0x18 Executed\r\n"); 
+	int8_t offset = (int8_t)gb->memory[pc + 1];
+
+	gb->pc += offset;
+}
+
 /*
  * @brief Op code function for Load instruction (0x1A): LD A,(DE)
  * @details Loads value pointed to register DE to register A
@@ -770,6 +786,8 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x15,   4,       1    },  // DEC D
 	{ opLD_0x16,    8,       2    },  // LD D, d8
 	{ opRLA_0x17,   4,       1    },  // RLA
+	{ opJR_0x18,    12,      2    },  // JR r8
+	{ opADD_0x19,   8,       1    },  // ADD HL, DE
 	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
 	{ opDEC_0x1B,   8,       1    },  // DEC DE
 	{ opINC_0x1C,   4,       1    },  // INC E
