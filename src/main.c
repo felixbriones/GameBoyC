@@ -12,7 +12,9 @@ int main(int argc, char** argv)
 	SDL_Renderer* sRenderer = NULL;
 	gameBoy_t gb;
 
-	// TODO: Add function for loading a ROM and determining if it valid
+	// TODO: create proper function to initialize gb struct
+	gb.cyclesExtraFlag = false;
+
 	if (argc != 2)
 	{
 		printf("Usage: gameboy_emulator <rom_file>");

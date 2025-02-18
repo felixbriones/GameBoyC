@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 #define FLAG_REG_ZERO  	    (1 << 7)
 #define FLAG_REG_SUB  	    (1 << 6)
@@ -67,15 +68,17 @@ typedef struct
 	// Can be paired for 16-bit operations: (AF, BC, DE, HL)
 	cpuReg_t generalReg;
 	
+	bool cyclesExtraFlag;
 	// Increments by 1
 	uint64_t cyclesCurrent;
-	// Will be used to ensure we 
+	// Will be used to ensure we maintain proper instruction timing
 	uint64_t cyclesTarget;
 	// Special Purpose Registers: (F)lags, Program Counter, Stack Pointer
 	uint16_t pc;
 	uint16_t sp;	
 	// The Gameboy has 64KB of addressable memory (65535 bytes)
 	uint8_t memory [GB_MEMORY_SIZE];
+	// 
 } gameBoy_t;
 
 // Define generalized opcode function data type which will be used to take one of many opcode functions at a time
@@ -87,6 +90,7 @@ typedef struct gbInstruction
 {
 	gbOpCode* operation;
 	uint8_t clockCycles;
+	uint8_t clockCyclesExtra;
 	uint8_t opCodeSize;
 };
 

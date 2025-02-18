@@ -781,8 +781,9 @@ void opJR_0x20(gameBoy_t* gb)  // JR NZ, e8
 	// Jump if flag Z is not set
 	if(!(gb->generalReg.f & FLAG_REG_ZERO))
 	{
-		// If true, add 4 cycles to the 8 in table to get 12
 		gb->pc += offset;
+		// If true, add 4 cycles to the 8 in table to get 12
+		gb->cyclesExtraFlag = true;
 	}
 }
 
@@ -817,46 +818,46 @@ void opLD_0x22(gameBoy_t* gb)
 
 /*
  * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
- * @details Contains the following data: { function pointer, cycles required, size of op code in bytes }
+ * @details { function pointer, cycles required, extra cycles required (for ops w/ variable timing), size in bytes }
  */
 struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 {
-//	{ function,     cycles,  size } 
-	{ opNOP_0x00,   4,       1    },  // NOP
-	{ opLD_0x01,    12,      3    },  // LD BC, d16
-	{ opLD_0x02,    8,       1    },  // LD (BC), A
-	{ opINC_0x03,   8,       1    },  // INC BC 
-	{ opINC_0x04,   4,       1    },  // INC B
-	{ opDEC_0x05,   4,       1    },  // DEC B
-	{ opLD_0x06,    8,       2    },  // LD B, d8
-	{ opRLCA_0x07,  4,       1    },  // RLCA
-	{ opLD_0x08,    20,      3    },  // LD (a16), SP
-	{ opADD_0x09,   8,       1    },  // ADD HL, BC
-	{ opLD_0x0A,    8,       1    },  // LD A, (BC) 
-	{ opDEC_0x0B,   8,       1    },  // DEC BC 
-	{ opINC_0x0C,   4,       1    },  // INC C 
-	{ opDEC_0x0D,   4,       1    },  // DEC C 
-	{ opLD_0x0E,    8,       2    },  // LD C, d8 
-	{ opRRCA_0x0F,  4,       1    },  // RRCA
-	{ opSTOP_0x10,  4,       2    },  // STOP d8
-	{ opLD_0x11,    12,      3    },  // LD DE, d16
-	{ opLD_0x12,    8,       1    },  // LD (DE), A
-	{ opINC_0x13,   8,       1    },  // INC DE
-	{ opINC_0x14,   4,       1    },  // INC D
-	{ opDEC_0x15,   4,       1    },  // DEC D
-	{ opLD_0x16,    8,       2    },  // LD D, d8
-	{ opRLA_0x17,   4,       1    },  // RLA
-	{ opJR_0x18,    12,      2    },  // JR r8
-	{ opADD_0x19,   8,       1    },  // ADD HL, DE
-	{ opLD_0x1A,    8,       1    },  // LD A,(DE)
-	{ opDEC_0x1B,   8,       1    },  // DEC DE
-	{ opINC_0x1C,   4,       1    },  // INC E
-	{ opDEC_0x1D,   4,       1    },  // DEC E
-	{ opLD_0x1E,    8,       2    },  // LD E,d8
-	{ opRRA_0x1F,   4,       1    },  // RRA
-	{ opJR_0x20,    8,       2    },  // JR NZ, e8 
-	{ opLD_0x21,    12,      3    },  // LD HL, d16
-	{ opLD_0x22,    8,       1    },  // LD (HL+),A
+//	{ function,     cycles,  extra,  size } 
+	{ opNOP_0x00,   4,       0,      1    },  // NOP
+	{ opLD_0x01,    12,      0,	 3    },  // LD BC, d16
+	{ opLD_0x02,    8,       0,	 1    },  // LD (BC), A
+	{ opINC_0x03,   8,       0,	 1    },  // INC BC 
+	{ opINC_0x04,   4,       0,	 1    },  // INC B
+	{ opDEC_0x05,   4,       0,	 1    },  // DEC B
+	{ opLD_0x06,    8,       0,	 2    },  // LD B, d8
+	{ opRLCA_0x07,  4,       0,	 1    },  // RLCA
+	{ opLD_0x08,    20,      0,	 3    },  // LD (a16), SP
+	{ opADD_0x09,   8,       0,	 1    },  // ADD HL, BC
+	{ opLD_0x0A,    8,       0,	 1    },  // LD A, (BC) 
+	{ opDEC_0x0B,   8,       0,	 1    },  // DEC BC 
+	{ opINC_0x0C,   4,       0,	 1    },  // INC C 
+	{ opDEC_0x0D,   4,       0,	 1    },  // DEC C 
+	{ opLD_0x0E,    8,       0,	 2    },  // LD C, d8 
+	{ opRRCA_0x0F,  4,       0,	 1    },  // RRCA
+	{ opSTOP_0x10,  4,       0,	 2    },  // STOP d8
+	{ opLD_0x11,    12,      0,	 3    },  // LD DE, d16
+	{ opLD_0x12,    8,       0,	 1    },  // LD (DE), A
+	{ opINC_0x13,   8,       0,	 1    },  // INC DE
+	{ opINC_0x14,   4,       0,	 1    },  // INC D
+	{ opDEC_0x15,   4,       0,	 1    },  // DEC D
+	{ opLD_0x16,    8,       0,	 2    },  // LD D, d8
+	{ opRLA_0x17,   4,       0,	 1    },  // RLA
+	{ opJR_0x18,    12,      0,	 2    },  // JR r8
+	{ opADD_0x19,   8,       0,	 1    },  // ADD HL, DE
+	{ opLD_0x1A,    8,       0,	 1    },  // LD A,(DE)
+	{ opDEC_0x1B,   8,       0,	 1    },  // DEC DE
+	{ opINC_0x1C,   4,       0,	 1    },  // INC E
+	{ opDEC_0x1D,   4,       0,	 1    },  // DEC E
+	{ opLD_0x1E,    8,       0,	 2    },  // LD E,d8
+	{ opRRA_0x1F,   4,       0,	 1    },  // RRA
+	{ opJR_0x20,    8,       4,	 2    },  // JR NZ, e8 
+	{ opLD_0x21,    12,      0,	 3    },  // LD HL, d16
+	{ opLD_0x22,    8,       0,	 1    },  // LD (HL+),A
 };
 
 /*
@@ -879,6 +880,13 @@ void gbHandleCycle(gameBoy_t* gb)
 		gb->pc+= gbDispatchTable[currentOpCode].opCodeSize;
 		// Set cyclesTarget so we know when to move on
 		gb->cyclesTarget = gb->cyclesCurrent + gbDispatchTable[currentOpCode].clockCycles;
+
+		// Some operations consume a variable amount of time. Account for that extra time if necessary
+		if(gb->cyclesExtraFlag == true)
+		{
+			gb->cyclesTarget += gbDispatchTable[currentOpCode].clockCyclesExtra;
+			gb->cyclesExtraFlag = false;
+		}
 	}
 
 	gb->cyclesCurrent++;
