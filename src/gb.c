@@ -771,8 +771,13 @@ void opRRA_0x1F(gameBoy_t* gb)
 	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
-// If Z flag is clear, jump to 8-bit signed offset 
-// 8 cycles if condition is false, 12 if condition is true
+/*
+ * @brief Op code function for Relative Jump instruction (0x18): JR r8
+ * @details If Z flag is clear, jump to 8-bit signed offset 
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8(false) or 12(true) cycles to execute
+ */
 void opJR_0x20(gameBoy_t* gb)  // JR NZ, e8 
 {
 	// Memory needs to be casted as int8_t 
@@ -817,6 +822,181 @@ void opLD_0x22(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Increment instruction (0x1C): INC HL
+ * @details Increment the value in register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x23(gameBoy_t* gb)
+{
+	printf("0x23\r\n");
+	gb->generalReg.hl++;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x1C): INC H
+ * @details Increment the value in register H
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x24(gameBoy_t* gb)
+{
+	printf("0x24\r\n");
+	gb->generalReg.h++;
+	
+	// Set Z flag if result is 0
+	if(gb->generalReg.h == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H flag if overflow from bit 3
+	if((gb->generalReg.h & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x1D): DEC H
+ * @details Decrement the value in register H
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opDEC_0x25(gameBoy_t* gb)
+{
+	printf("0x25\r\n");
+	gb->generalReg.h--;
+	
+	// Set Z if result is 0
+	if(gb->generalReg.h == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H if borrow from bit 4
+	if((gb->generalReg.h & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set N flag
+	gb->generalReg.f |= FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x1D): DEC HL
+ * @details Decrement the value in register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ */
+void opDEC_0x2B(gameBoy_t* gb)
+{
+	printf("0x2B\r\n");
+	gb->generalReg.hl--;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x1C): INC L
+ * @details Increment the value in register L
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opINC_0x2C(gameBoy_t* gb) 
+{
+	printf("0x2C\r\n");
+	gb->generalReg.l++;
+	
+	// Set Z flag if result is 0
+	if(gb->generalReg.l == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H flag if overflow from bit 3
+	if((gb->generalReg.l & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x1D): DEC L
+ * @details Decrement the value in register L
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects (Z)ero, (N)Sub, and (H)alf Carry flags
+ */
+void opDEC_0x2D(gameBoy_t* gb)
+{
+	printf("0x2D\r\n");
+	gb->generalReg.l--;
+	
+	// Set Z if result is 0
+	if(gb->generalReg.l == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	// Set H if borrow from bit 4
+	if((gb->generalReg.l & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set N flag
+	gb->generalReg.f |= FLAG_REG_SUB;
+}
+
+/*
  * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
  * @details { function pointer, cycles required, extra cycles required (for ops w/ variable timing), size in bytes }
  */
@@ -858,6 +1038,12 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opJR_0x20,    8,       4,	 2    },  // JR NZ, e8 
 	{ opLD_0x21,    12,      0,	 3    },  // LD HL, d16
 	{ opLD_0x22,    8,       0,	 1    },  // LD (HL+),A
+	{ opINC_0x23,   8,       0,	 1    },  // INC HL
+	{ opINC_0x24,   4,       0,	 1    },  // INC H
+	{ opDEC_0x25,   4,       0,	 1    },  // DEC H
+	{ opDEC_0x2B,   8,       0,	 1    },  // DEC HL
+	{ opINC_0x2C,   4,       0,	 1    },  // INC L
+	{ opDEC_0x2D,   4,       0,	 1    },  // DEC L
 };
 
 /*
