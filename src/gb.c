@@ -577,7 +577,7 @@ void opRLA_0x17(gameBoy_t* gb)
 void opJR_0x18(gameBoy_t* gb)
 {
 	printf("JR 0x18 Executed\r\n"); 
-	int8_t offset = (int8_t)gb->memory[pc + 1];
+	int8_t offset = (int8_t)gb->memory[gb->pc + 1];
 
 	gb->pc += offset;
 }
@@ -771,6 +771,21 @@ void opRRA_0x1F(gameBoy_t* gb)
 	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
 }
 
+// If Z flag is clear, jump to 8-bit signed offset 
+// 8 cycles if condition is false, 12 if condition is true
+void opJR_0x20(gameBoy_t* gb)  // JR NZ, e8 
+{
+	// Memory needs to be casted as int8_t 
+	int8_t offset = (int8_t)gb->memory[gb->pc + 1];
+
+	// Jump if flag Z is not set
+	if(!(gb->generalReg.f & FLAG_REG_ZERO))
+	{
+		// If true, add 4 cycles to the 8 in table to get 12
+		gb->pc += offset;
+	}
+}
+
 /*
  * @brief Op code function for Load instruction (0x21): LD HL, d16
  * @details Loads 16-bit value into register HL
@@ -839,6 +854,7 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x1D,   4,       1    },  // DEC E
 	{ opLD_0x1E,    8,       2    },  // LD E,d8
 	{ opRRA_0x1F,   4,       1    },  // RRA
+	{ opJR_0x20,    8,       2    },  // JR NZ, e8 
 	{ opLD_0x21,    12,      3    },  // LD HL, d16
 	{ opLD_0x22,    8,       1    },  // LD (HL+),A
 };
