@@ -45,7 +45,6 @@ void opNOP_0x00(gameBoy_t* gb)
  */
 void opLD_0x01(gameBoy_t* gb)
 {
-	printf("LD 0x01 Executed\r\n"); 
 	uint16_t value = gb->memory[gb->pc + 1] | (gb->memory[gb->pc + 2] << 8);
 	gb->generalReg.bc = value;
 }
@@ -59,7 +58,6 @@ void opLD_0x01(gameBoy_t* gb)
  */
 void opLD_0x02(gameBoy_t* gb)
 {
-	printf("LD 0x02 Executed\r\n"); 
 	uint8_t value = gb->generalReg.a;
 	gb->memory[gb->generalReg.bc] = value;
 }
@@ -73,7 +71,6 @@ void opLD_0x02(gameBoy_t* gb)
  */
 void opINC_0x03(gameBoy_t* gb)
 {
-	printf("INC 0x03 Executed\r\n"); 
 	gb->generalReg.bc++;
 }
 
@@ -87,7 +84,6 @@ void opINC_0x03(gameBoy_t* gb)
  */
 void opINC_0x04(gameBoy_t* gb)
 {
-	printf("INC 0x04 Executed\r\n"); 
 	gb->generalReg.b++;
 
 	// Set Z if result is 0
@@ -124,7 +120,6 @@ void opINC_0x04(gameBoy_t* gb)
  */
 void opDEC_0x05(gameBoy_t* gb)
 {
-	printf("DEC 0x05 Executed\r\n"); 
 	gb->generalReg.b--;
 
 	// Set Z if result is 0
@@ -160,7 +155,6 @@ void opDEC_0x05(gameBoy_t* gb)
  */
 void opLD_0x06(gameBoy_t* gb)
 {
-	printf("LD 0x06 Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.b = value;
 }
@@ -175,7 +169,6 @@ void opLD_0x06(gameBoy_t* gb)
  */
 void opRLCA_0x07(gameBoy_t* gb)
 {
-	printf("RLCA 0x07 Executed\r\n"); 
 	uint8_t carry = 0x00;
 
 	// Set C flag if bit 7 is set
@@ -203,7 +196,6 @@ void opRLCA_0x07(gameBoy_t* gb)
  */
 void opLD_0x08(gameBoy_t* gb)
 {
-	printf("LD 0x08 Executed\r\n"); 
 	uint16_t value = gb->sp;
 	uint16_t memAddr = gb->memory[gb->pc + 1] | (gb->memory[gb->pc + 2] << 8);
 	// memory is uint8_t array, but sp is uint16_t. Store in 8-bit chunks (little-endian)
@@ -221,7 +213,6 @@ void opLD_0x08(gameBoy_t* gb)
  */
 void opADD_0x09(gameBoy_t* gb)
 {
-	printf("ADD 0x09 Executed\r\n"); 
 	uint16_t value = gb->generalReg.bc;
 
 	// Set H if overflow from bit 11
@@ -259,7 +250,6 @@ void opADD_0x09(gameBoy_t* gb)
  */
 void opLD_0x0A(gameBoy_t* gb)
 {
-	printf("LD 0x0A Executed\r\n"); 
 	uint8_t value = gb->memory[gb->generalReg.bc];
 	gb->generalReg.a = value;
 }
@@ -273,7 +263,6 @@ void opLD_0x0A(gameBoy_t* gb)
  */
 void opDEC_0x0B(gameBoy_t* gb)
 {
-	printf("DEC 0x0B Executed\r\n"); 
 	gb->generalReg.b--;
 }
 
@@ -287,7 +276,6 @@ void opDEC_0x0B(gameBoy_t* gb)
  */
 void opINC_0x0C(gameBoy_t* gb)
 {
-	printf("INC 0x0C Executed\r\n"); 
 	gb->generalReg.c++;
 
 	// Set if overflow from bit 3
@@ -324,7 +312,6 @@ void opINC_0x0C(gameBoy_t* gb)
  */
 void opDEC_0x0D(gameBoy_t* gb)
 {
-	printf("DEC 0x0D Executed\r\n"); 
 
 	gb->generalReg.c--;
 	
@@ -361,7 +348,6 @@ void opDEC_0x0D(gameBoy_t* gb)
  */
 void opLD_0x0E(gameBoy_t* gb)
 {
-	printf("LD 0x0E Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.c = value;
 }
@@ -397,7 +383,6 @@ void opRRCA_0x0F(gameBoy_t* gb)
 // TODO: Research and implement STOP functionality 
 void opSTOP_0x10(gameBoy_t* gb)
 {
-	printf("STOP 0x10 Executed\r\n"); 
 }
 
 /*
@@ -409,7 +394,6 @@ void opSTOP_0x10(gameBoy_t* gb)
  */
 void opLD_0x11(gameBoy_t* gb)
 {
-	printf("LD 0x11 Executed\r\n"); 
 	uint16_t value = gb->memory[gb->pc + 1] | gb->memory[gb->pc + 2] << 8;
 	gb->generalReg.de = value;
 }
@@ -423,7 +407,6 @@ void opLD_0x11(gameBoy_t* gb)
  */
 void opLD_0x12(gameBoy_t* gb)
 {
-	printf("LD 0x12 Executed\r\n"); 
 	uint8_t value = gb->generalReg.a;
 	uint16_t memAddr = gb->generalReg.de;
 	gb->memory[memAddr] = value;
@@ -438,7 +421,6 @@ void opLD_0x12(gameBoy_t* gb)
  */
 void opINC_0x13(gameBoy_t* gb)
 {
-	printf("INC 0x13 Executed\r\n"); 
 	gb->generalReg.de++;	
 }
 
@@ -452,7 +434,6 @@ void opINC_0x13(gameBoy_t* gb)
  */
 void opINC_0x14(gameBoy_t* gb)
 {
-	printf("INC 0x14 Executed\r\n"); 
 	
 	gb->generalReg.d++;
 
@@ -490,7 +471,6 @@ void opINC_0x14(gameBoy_t* gb)
  */
 void opDEC_0x15(gameBoy_t* gb)
 {
-	printf("DEC 0x15 Executed\r\n"); 
 	
 	gb->generalReg.d--;
 
@@ -527,7 +507,6 @@ void opDEC_0x15(gameBoy_t* gb)
  */
 void opLD_0x16(gameBoy_t* gb)
 {
-	printf("LD 0x16 Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.d = value;
 }
@@ -542,7 +521,6 @@ void opLD_0x16(gameBoy_t* gb)
  */
 void opRLA_0x17(gameBoy_t* gb)
 {
-	printf("RLA 0x17 Executed\r\n"); 
 
 	uint8_t carry = 0x00;
 
@@ -576,7 +554,6 @@ void opRLA_0x17(gameBoy_t* gb)
  */
 void opJR_0x18(gameBoy_t* gb)
 {
-	printf("JR 0x18 Executed\r\n"); 
 	int8_t offset = (int8_t)gb->memory[gb->pc + 1];
 
 	gb->pc += offset;
@@ -592,7 +569,6 @@ void opJR_0x18(gameBoy_t* gb)
  */
 void opADD_0x19(gameBoy_t* gb) 
 {
-	printf("ADD 0x19 Executed\r\n"); 
 	uint16_t value = 0;
 	value = gb->generalReg.de;
 
@@ -630,7 +606,6 @@ void opADD_0x19(gameBoy_t* gb)
  */
 void opLD_0x1A(gameBoy_t* gb)
 {
-	printf("LD 0x1A Executed\r\n"); 
 	uint8_t value = gb->memory[gb->generalReg.de];
 	gb->generalReg.a = value;
 }
@@ -644,7 +619,6 @@ void opLD_0x1A(gameBoy_t* gb)
  */
 void opDEC_0x1B(gameBoy_t* gb)  // DEC DE
 {
-	printf("DEC 0x1B Executed\r\n"); 
 	gb->generalReg.de--;
 }
 
@@ -658,7 +632,6 @@ void opDEC_0x1B(gameBoy_t* gb)  // DEC DE
  */
 void opINC_0x1C(gameBoy_t* gb)
 {
-	printf("INC 0x1C Executed\r\n"); 
 	gb->generalReg.e++;
 	
 	// Set Z if result is 0
@@ -695,7 +668,6 @@ void opINC_0x1C(gameBoy_t* gb)
  */
 void opDEC_0x1D(gameBoy_t* gb)
 {
-	printf("DEC 0x1D Executed\r\n"); 
 	gb->generalReg.e--;
 
 	// Set Z if result is 0
@@ -731,7 +703,6 @@ void opDEC_0x1D(gameBoy_t* gb)
  */
 void opLD_0x1E(gameBoy_t* gb)
 {
-	printf("LD 0x1E Executed\r\n"); 
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.e = value;
 }
@@ -746,7 +717,6 @@ void opLD_0x1E(gameBoy_t* gb)
  */
 void opRRA_0x1F(gameBoy_t* gb)
 {
-	printf("RRA 0x1F Executed\r\n"); 
 
 	uint8_t carry = 0x00;
 	
@@ -801,7 +771,6 @@ void opJR_0x20(gameBoy_t* gb)  // JR NZ, e8
  */
 void opLD_0x21(gameBoy_t* gb)
 {
-	printf("LD 0x21 Executed\r\n"); 
 	uint16_t value = gb->memory[gb->pc + 1] | gb->memory[gb->pc + 2];
 	gb->generalReg.hl = value;
 }
@@ -815,7 +784,6 @@ void opLD_0x21(gameBoy_t* gb)
  */
 void opLD_0x22(gameBoy_t* gb)
 {
-	printf("LD 0x22 Executed\r\n"); 
 	uint16_t value = gb->generalReg.a;
 	gb->generalReg.hl = value;
 	gb->generalReg.hl++;
@@ -831,7 +799,6 @@ void opLD_0x22(gameBoy_t* gb)
  */
 void opINC_0x23(gameBoy_t* gb)
 {
-	printf("0x23\r\n");
 	gb->generalReg.hl++;
 }
 
@@ -845,7 +812,6 @@ void opINC_0x23(gameBoy_t* gb)
  */
 void opINC_0x24(gameBoy_t* gb)
 {
-	printf("0x24\r\n");
 	gb->generalReg.h++;
 	
 	// Set Z flag if result is 0
@@ -882,7 +848,6 @@ void opINC_0x24(gameBoy_t* gb)
  */
 void opDEC_0x25(gameBoy_t* gb)
 {
-	printf("0x25\r\n");
 	gb->generalReg.h--;
 	
 	// Set Z if result is 0
@@ -918,7 +883,6 @@ void opDEC_0x25(gameBoy_t* gb)
  */
 void opDEC_0x2B(gameBoy_t* gb)
 {
-	printf("0x2B\r\n");
 	gb->generalReg.hl--;
 }
 
@@ -932,7 +896,6 @@ void opDEC_0x2B(gameBoy_t* gb)
  */
 void opINC_0x2C(gameBoy_t* gb) 
 {
-	printf("0x2C\r\n");
 	gb->generalReg.l++;
 	
 	// Set Z flag if result is 0
@@ -969,7 +932,6 @@ void opINC_0x2C(gameBoy_t* gb)
  */
 void opDEC_0x2D(gameBoy_t* gb)
 {
-	printf("0x2D\r\n");
 	gb->generalReg.l--;
 	
 	// Set Z if result is 0
@@ -994,6 +956,46 @@ void opDEC_0x2D(gameBoy_t* gb)
 
 	// Set N flag
 	gb->generalReg.f |= FLAG_REG_SUB;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x26): LD H, d8
+ * @details Loads 8-bit value to register H
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 byte long and requires 8 cycles to execute
+ */
+void opLD_0x26(gameBoy_t* gb)  
+{
+	uint8_t value = gb->memory[gb->pc + 1];
+	gb->generalReg.h = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x2A): LD A,(HL+)
+ * @details Loads value pointed to register HL to register A, then increments HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opLD_0x2A(gameBoy_t* gb)
+{
+	uint8_t value = gb->memory[gb->generalReg.hl];
+	gb->generalReg.a = value;
+	gb->generalReg.hl++;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x2E): LD L, d8
+ * @details Loads 8-bit value to register L 
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 byte long and requires 8 cycles to execute
+ */
+void opLD_0x2E(gameBoy_t* gb)
+{
+	uint8_t value = gb->memory[gb->pc + 1];
+	gb->generalReg.l = value;
 }
 
 /*
@@ -1041,9 +1043,12 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x23,   8,       0,	 1    },  // INC HL
 	{ opINC_0x24,   4,       0,	 1    },  // INC H
 	{ opDEC_0x25,   4,       0,	 1    },  // DEC H
+	{ opLD_0x26,    8,       0,	 2    },  // LD H, d8
+	{ opLD_0x2A,    8,       0,	 1    },  // LD A, (HL+)
 	{ opDEC_0x2B,   8,       0,	 1    },  // DEC HL
 	{ opINC_0x2C,   4,       0,	 1    },  // INC L
 	{ opDEC_0x2D,   4,       0,	 1    },  // DEC L
+	{ opLD_0x2E,    8,       0,	 2    },  // LD L, d8
 };
 
 /*
