@@ -572,7 +572,7 @@ void opADD_0x19(gameBoy_t* gb)
 	uint16_t value = 0;
 	value = gb->generalReg.de;
 
-	// Set H if overflow from bit 11 // Incorrect - this works for inc not add
+	// Set H if overflow from bit 11
 	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF )
 	{
 		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
@@ -972,6 +972,98 @@ void opLD_0x26(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Decimal Adjust Accumulator instruction (0x27): DAA
+ * @details if (N):: if (H): Add $6 to adjust / if (C): Add $60 to adjust. Subtract adjust from register A
+	if (!N):: initialize adjust to 0 / if(H || A & $F > $9): add $6 to adjust / if(C || A > $99): add
+	$60 to adjust and set C flag/ Add adjust to register A. Binary Coded Decimal
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects flags: Z, H, C
+ */
+void opDAA_0x27(gameBoy_t* gb)  
+{
+	uint8_t adjust = 0;
+
+	// Behavior differs based on whether N flag is set or not
+	if(gb->generalReg.f & FLAG_REG_SUB)
+	{
+		if(gb->generalReg.f & FLAG_REG_HALF_CARRY)
+		{
+			adjust += 0x06;
+		}
+		if(gb->generalReg.f & FLAG_REG_CARRY)
+		{
+			adjust += 0x60;
+		}
+		gb->generalReg.a -= adjust;
+	}
+	else
+	{
+		if((gb->generalReg.f & FLAG_REG_HALF_CARRY) || ((gb->generalReg.a & 0x0F) > 0x09))
+		{
+			adjust += 0x06;
+		}
+		if((gb->generalReg.f & FLAG_REG_CARRY) || (gb->generalReg.a > 0x99))
+		{
+			adjust += 0x60;
+			gb->generalReg.f |= FLAG_REG_CARRY;
+		}
+		gb->generalReg.a += adjust;
+	}
+
+	// Set Z flag if 0. Clear otherwise
+	if(gb->generalReg.a == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+}
+
+/*
+ * @brief Op code function for Add instruction (0x29): ADD HL, HL
+ * @details Add the value in register HL to register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ * @note Affects flags: N, H, C
+ */
+void opADD_0x29(gameBoy_t* gb)
+{
+	uint8_t value = gb->generalReg.hl;
+	gb->generalReg.hl += value;
+
+
+	// Set H if overflow from bit 11
+	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF )
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set C if overflow from bit 15
+	if(((uint32_t)gb->generalReg.hl + (uint32_t)value) > 0xFFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
  * @brief Op code function for Load instruction (0x2A): LD A,(HL+)
  * @details Loads value pointed to register HL to register A, then increments HL
  * @param Pointer to gb struct containing registers
@@ -1044,6 +1136,8 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x24,   4,       0,	 1    },  // INC H
 	{ opDEC_0x25,   4,       0,	 1    },  // DEC H
 	{ opLD_0x26,    8,       0,	 2    },  // LD H, d8
+	{ opDAA_0x27,   4,       0,	 1    },  // DAA
+	{ opADD_0x29,   8,       0,	 1    },  // ADD HL, HL
 	{ opLD_0x2A,    8,       0,	 1    },  // LD A, (HL+)
 	{ opDEC_0x2B,   8,       0,	 1    },  // DEC HL
 	{ opINC_0x2C,   4,       0,	 1    },  // INC L
