@@ -14,6 +14,39 @@ uint16_t gbGetOpCode(gameBoy_t* gb)
 }
 
 /*
+ * @brief Helper function for adding a 16-bit value to register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ */
+void gbADD_HL_r16(gameBoy_t* gb, uint16_t value)
+{
+	gb->generalReg.hl += value;
+
+	// Set H if overflow from bit 11
+	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set C if overflow from bit 15
+	if(((uint32_t)gb->generalReg.hl + (uint32_t)value) > 0xFFFF)
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY;
+	}
+
+	// Clear N flag
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+}
+
+/*
  * @brief Handles invalid or unknown opcodes and prints it
  * @param Pointer to gb struct containing registers
  * @return void
@@ -214,31 +247,7 @@ void opLD_0x08(gameBoy_t* gb)
 void opADD_0x09(gameBoy_t* gb)
 {
 	uint16_t value = gb->generalReg.bc;
-
-	// Set H if overflow from bit 11
-	if((gb->generalReg.hl & 0xFFF) + (value & 0xFFF) > 0xFFF)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Set C if overflow from bit 15
-	if((uint32_t)gb->generalReg.hl + (uint32_t)value > 0xFFFF)
-	{
-		gb->generalReg.f |= FLAG_REG_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_CARRY;
-	}
-
-	gb->generalReg.hl += value;	
-
-	// Set N flag to 0
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gbADD_HL_r16(gb, value);
 }
 
 /*
@@ -569,32 +578,8 @@ void opJR_0x18(gameBoy_t* gb)
  */
 void opADD_0x19(gameBoy_t* gb) 
 {
-	uint16_t value = 0;
-	value = gb->generalReg.de;
-
-	// Set H if overflow from bit 11
-	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF )
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Set C if overflow from bit 15
-	if(((uint32_t)gb->generalReg.hl + (uint32_t)value) > 0xFFFF)
-	{
-		gb->generalReg.f |= FLAG_REG_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;
-	gb->generalReg.hl += value;
+	uint16_t value = gb->generalReg.de;
+	gbADD_HL_r16(gb, value);
 }
 
 /*
@@ -1035,32 +1020,8 @@ void opDAA_0x27(gameBoy_t* gb)
  */
 void opADD_0x29(gameBoy_t* gb)
 {
-	uint8_t value = gb->generalReg.hl;
-	gb->generalReg.hl += value;
-
-
-	// Set H if overflow from bit 11
-	if(((gb->generalReg.hl & 0xFFF) + (value & 0xFFF)) > 0xFFF )
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Set C if overflow from bit 15
-	if(((uint32_t)gb->generalReg.hl + (uint32_t)value) > 0xFFFF)
-	{
-		gb->generalReg.f |= FLAG_REG_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	uint16_t value = gb->generalReg.hl;
+	gbADD_HL_r16(gb, value);
 }
 
 /*
