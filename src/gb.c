@@ -14,9 +14,83 @@ uint16_t gbGetOpCode(gameBoy_t* gb)
 }
 
 /*
- * @brief Helper function for adding a 16-bit value to register HL
- * @param Pointer to gb struct containing registers
+ * @brief Helper function for incrementing an 8-bit register
+ * @param gb pointer to gb struct containing registers
+ * @param reg 8-bit register to be incremented
  * @return void
+ * @note Affects flags: Z N H 
+ */
+void gbINC_r8(gameBoy_t* gb, uint8_t* reg)
+{
+	uint8_t result = *reg + 1;
+
+	// Set Z if result is 0
+	if(result == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+	
+	// Set H if borrow from bit 3
+	if((result & 0x0F) == 0x00)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Clear N
+	gb->generalReg.f &= ~FLAG_REG_SUB;
+	*reg = result;
+}
+
+/*
+ * @brief Helper function for decrementing an 8-bit register
+ * @param gb pointer to gb struct containing registers
+ * @param reg 8-bit register to be incremented
+ * @return void
+ * @note Affects flags: Z N H 
+ */
+void gbDEC_r8(gameBoy_t* gb, uint8_t* reg)
+{
+	uint8_t result = *reg - 1;
+
+	// Set Z if result is 0
+	if(result == 0)
+	{
+		gb->generalReg.f |= FLAG_REG_ZERO;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_ZERO;
+	}
+	
+	// Set if borrow from bit 4
+	if((result & 0x0F) == 0x0F)
+	{
+		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
+	}
+	else
+	{
+		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
+	}
+
+	// Set N
+	gb->generalReg.f |= FLAG_REG_SUB;
+	*reg = result;
+}
+
+/*
+ * @brief Helper function for adding a 16-bit value to register HL
+ * @param gb pointer to gb struct containing registers
+ * @param value 16-bit number to be added to register HL
+ * @return void
+ * @note Affects flags: N H C
  */
 void gbADD_HL_r16(gameBoy_t* gb, uint16_t value)
 {
@@ -117,30 +191,7 @@ void opINC_0x03(gameBoy_t* gb)
  */
 void opINC_0x04(gameBoy_t* gb)
 {
-	gb->generalReg.b++;
-
-	// Set Z if result is 0
-	if(gb->generalReg.b == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-	
-	// Incrementing. Clear N
-	gb->generalReg.f &= ~FLAG_REG_SUB;
-
-	// Set if borrow from bit 3
-	if((gb->generalReg.b & 0x0F) == 0x00)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
+	gbINC_r8(gb, &gb->generalReg.b);
 }
 
 /*
@@ -153,30 +204,7 @@ void opINC_0x04(gameBoy_t* gb)
  */
 void opDEC_0x05(gameBoy_t* gb)
 {
-	gb->generalReg.b--;
-
-	// Set Z if result is 0
-	if(gb->generalReg.b == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-	
-	// Decrementing. Set N
-	gb->generalReg.f |= FLAG_REG_SUB;
-
-	// Set if borrow from bit 4
-	if((gb->generalReg.b & 0x0F) == 0x0F)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
+	gbDEC_r8(gb, &gb->generalReg.b);
 }
 
 /*
@@ -285,30 +313,7 @@ void opDEC_0x0B(gameBoy_t* gb)
  */
 void opINC_0x0C(gameBoy_t* gb)
 {
-	gb->generalReg.c++;
-
-	// Set if overflow from bit 3
-	if((gb->generalReg.c & 0x0F) == 0x00)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;		
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;		
-	}
-	
-	// Set if result equals 0
-	if(gb->generalReg.c == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;		
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;		
-	}
-
-	// Clear flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;		
+	gbINC_r8(gb, &gb->generalReg.c);
 }
 
 /*
@@ -321,31 +326,7 @@ void opINC_0x0C(gameBoy_t* gb)
  */
 void opDEC_0x0D(gameBoy_t* gb)
 {
-
-	gb->generalReg.c--;
-	
-	// Set if borrow from bit 4
-	if((gb->generalReg.c & 0x0F) == 0x0F)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;		
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;		
-	}
-	
-	// Set if result equals 0
-	if(gb->generalReg.c == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;		
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;		
-	}
-
-	// Set flag
-	gb->generalReg.f |= FLAG_REG_SUB;
+	gbDEC_r8(gb, &gb->generalReg.c);
 }
 
 /*
@@ -443,31 +424,7 @@ void opINC_0x13(gameBoy_t* gb)
  */
 void opINC_0x14(gameBoy_t* gb)
 {
-	
-	gb->generalReg.d++;
-
-	// Set Z flag if result is 0
-	if(gb->generalReg.d == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H flag if overflow from bit 3
-	if((gb->generalReg.d & 0x0F) == 0x00)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gbINC_r8(gb, &gb->generalReg.d);
 }
 
 /*
@@ -480,31 +437,7 @@ void opINC_0x14(gameBoy_t* gb)
  */
 void opDEC_0x15(gameBoy_t* gb)
 {
-	
-	gb->generalReg.d--;
-
-	// Set Z flag if result is 0
-	if(gb->generalReg.d == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H flag if borrow from bit 4
-	if((gb->generalReg.d & 0x0F) == 0x0F)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f |= FLAG_REG_SUB;
+	gbDEC_r8(gb, &gb->generalReg.d);
 }
 
 /*
@@ -617,30 +550,7 @@ void opDEC_0x1B(gameBoy_t* gb)  // DEC DE
  */
 void opINC_0x1C(gameBoy_t* gb)
 {
-	gb->generalReg.e++;
-	
-	// Set Z if result is 0
-	if(gb->generalReg.e == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H if overflow from bit 3
-	if((gb->generalReg.e & 0xF) == 0x0)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-	
-	// Clear the register
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gbINC_r8(gb, &gb->generalReg.e);
 }
 
 /*
@@ -797,30 +707,7 @@ void opINC_0x23(gameBoy_t* gb)
  */
 void opINC_0x24(gameBoy_t* gb)
 {
-	gb->generalReg.h++;
-	
-	// Set Z flag if result is 0
-	if(gb->generalReg.h == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H flag if overflow from bit 3
-	if((gb->generalReg.h & 0x0F) == 0x00)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gbINC_r8(gb, &gb->generalReg.h);
 }
 
 /*
@@ -833,30 +720,7 @@ void opINC_0x24(gameBoy_t* gb)
  */
 void opDEC_0x25(gameBoy_t* gb)
 {
-	gb->generalReg.h--;
-	
-	// Set Z if result is 0
-	if(gb->generalReg.h == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H if borrow from bit 4
-	if((gb->generalReg.h & 0x0F) == 0x0F)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Set N flag
-	gb->generalReg.f |= FLAG_REG_SUB;
+	gbDEC_r8(gb, &gb->generalReg.h);
 }
 
 /*
@@ -881,30 +745,7 @@ void opDEC_0x2B(gameBoy_t* gb)
  */
 void opINC_0x2C(gameBoy_t* gb) 
 {
-	gb->generalReg.l++;
-	
-	// Set Z flag if result is 0
-	if(gb->generalReg.l == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H flag if overflow from bit 3
-	if((gb->generalReg.l & 0x0F) == 0x00)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Clear N flag
-	gb->generalReg.f &= ~FLAG_REG_SUB;
+	gbINC_r8(gb, &gb->generalReg.l);
 }
 
 /*
@@ -917,30 +758,7 @@ void opINC_0x2C(gameBoy_t* gb)
  */
 void opDEC_0x2D(gameBoy_t* gb)
 {
-	gb->generalReg.l--;
-	
-	// Set Z if result is 0
-	if(gb->generalReg.l == 0)
-	{
-		gb->generalReg.f |= FLAG_REG_ZERO;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_ZERO;
-	}
-
-	// Set H if borrow from bit 4
-	if((gb->generalReg.l & 0x0F) == 0x0F)
-	{
-		gb->generalReg.f |= FLAG_REG_HALF_CARRY;
-	}
-	else
-	{
-		gb->generalReg.f &= ~FLAG_REG_HALF_CARRY;
-	}
-
-	// Set N flag
-	gb->generalReg.f |= FLAG_REG_SUB;
+	gbDEC_r8(gb, &gb->generalReg.l);
 }
 
 /*
