@@ -8,8 +8,8 @@
 
 #define GB_MEMORY_SIZE 	    0x10000
 
-#ifndef GH_H
-#define GH_H
+#ifndef GB_H
+#define GB_H
 
 // GameBoy bootROM starts at memory address 0x0
 // Cartridge ROM loaded into memory address 0x0100
@@ -92,7 +92,7 @@ typedef struct gbInstruction
 	uint8_t clockCycles;
 	uint8_t clockCyclesExtra;
 	uint8_t opCodeSize;
-};
+} gbInstruction;
 
 void gbHandleCycle(gameBoy_t* gb);
 

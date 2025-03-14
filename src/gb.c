@@ -128,7 +128,7 @@ void gbADD_HL_r16(gameBoy_t* gb, uint16_t value)
  */
 void invalid(gameBoy_t* gb)
 {
-	printf("Invalid opcode: %#04x\r\n");
+	printf("Invalid opcode: %#04x\r\n", gb->memory[gb->pc]);
 }
 
 /*
@@ -140,7 +140,7 @@ void invalid(gameBoy_t* gb)
  */
 void opNOP_0x00(gameBoy_t* gb)
 {
-	printf("opcode: \r\n");
+	printf("NOP: %#04x\r\n", gb->memory[gb->pc]);
 }
 
 /*
@@ -373,6 +373,7 @@ void opRRCA_0x0F(gameBoy_t* gb)
 // TODO: Research and implement STOP functionality 
 void opSTOP_0x10(gameBoy_t* gb)
 {
+	printf("STOP: %#04x\r\n", gb->memory[gb->pc]);
 }
 
 /*
@@ -637,7 +638,7 @@ void opRRA_0x1F(gameBoy_t* gb)
 }
 
 /*
- * @brief Op code function for Relative Jump instruction (0x18): JR r8
+ * @brief Op code function for Relative Jump instruction (0x20): JR r8
  * @details If Z flag is clear, jump to 8-bit signed offset 
  * @param Pointer to gb struct containing registers
  * @return void
@@ -829,6 +830,27 @@ void opDAA_0x27(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Relative Jump instruction (0x20): JR r8
+ * @details If Z flag is set, jump to 8-bit signed offset 
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8(false) or 12(true) cycles to execute
+ */
+void opJR_0x28(gameBoy_t* gb) 
+{
+	// Memory needs to be casted as int8_t 
+	int8_t offset = (int8_t)gb->memory[gb->pc + 1];
+
+	// Jump if flag Z is set
+	if(gb->generalReg.f & FLAG_REG_ZERO)
+	{
+		gb->pc += offset;
+		// If true, add 4 cycles to the 8 in table to get 12
+		gb->cyclesExtraFlag = true;
+	}
+}
+
+/*
  * @brief Op code function for Add instruction (0x29): ADD HL, HL
  * @details Add the value in register HL to register HL
  * @param Pointer to gb struct containing registers
@@ -916,6 +938,7 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x25,   4,       0,	 1    },  // DEC H
 	{ opLD_0x26,    8,       0,	 2    },  // LD H, d8
 	{ opDAA_0x27,   4,       0,	 1    },  // DAA
+	{ opJR_0x28,    4,       0,	 1    },  // JR Z
 	{ opADD_0x29,   8,       0,	 1    },  // ADD HL, HL
 	{ opLD_0x2A,    8,       0,	 1    },  // LD A, (HL+)
 	{ opDEC_0x2B,   8,       0,	 1    },  // DEC HL
