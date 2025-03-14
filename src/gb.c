@@ -892,6 +892,18 @@ void opLD_0x2E(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Complement instruction (0x2F): CPL
+ * @details Complements (Bitwise NOT) operation on accumulator
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ */
+void opCPL_0x2F(gameBoy_t* gb)
+{
+	gb->generalReg.a = ~gb->generalReg.a;
+}
+
+/*
  * @brief Consolidated table containing data for each operation supported by the LR35902 processor (Intel 8080 + Zilog Z80)
  * @details { function pointer, cycles required, extra cycles required (for ops w/ variable timing), size in bytes }
  */
@@ -945,6 +957,7 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x2C,   4,       0,	 1    },  // INC L
 	{ opDEC_0x2D,   4,       0,	 1    },  // DEC L
 	{ opLD_0x2E,    8,       0,	 2    },  // LD L, d8
+	{ opCPL_0x2F,   4,       0,	 1    },  // CPL
 };
 
 /*
