@@ -932,7 +932,7 @@ void opLD_0x32(gameBoy_t* gb)
 
 /*
  * @brief Op code function for Load instruction (0x36): LD (HL), n8
- * @details Complements (Bitwise NOT) operation on accumulator
+ * @details Copies value n8 into address pointed to by register HL
  * @param Pointer to gb struct containing registers
  * @return void
  * @note This instruction is 2 bytes long and requires 12 cycles to execute
@@ -941,6 +941,33 @@ void opLD_0x36(gameBoy_t* gb)
 {
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->memory[gb->generalReg.hl] = value;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x3A): LD A, (HL-)
+ * @details Loads the value pointed to by register HL to register A. HL is then decremented
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 bytes long and requires 8 cycles to execute
+ */
+void opLD_0x3A(gameBoy_t* gb) 
+{
+	uint8_t value = gb->memory[gb->generalReg.hl];
+	gb->generalReg.a = value;
+	gb->generalReg.hl--;
+}
+
+/*
+ * @brief Op code function for Load instruction (0x3E): LD A, n8
+ * @details Copies value n8 into register A
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 2 bytes long and requires 8 cycles to execute
+ */
+void opLD_0x3E(gameBoy_t* gb) 
+{
+	uint8_t value = gb->memory[gb->pc + 1];
+	gb->generalReg.a = value;
 }
 
 /*
@@ -990,7 +1017,7 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x25,   4,       0,	 1    },  // DEC H
 	{ opLD_0x26,    8,       0,	 2    },  // LD H, d8
 	{ opDAA_0x27,   4,       0,	 1    },  // DAA
-	{ opJR_0x28,    4,       0,	 1    },  // JR Z
+	{ opJR_0x28,    8,       4,	 2    },  // JR Z
 	{ opADD_0x29,   8,       0,	 1    },  // ADD HL, HL
 	{ opLD_0x2A,    8,       0,	 1    },  // LD A, (HL+)
 	{ opDEC_0x2B,   8,       0,	 1    },  // DEC HL
@@ -998,9 +1025,11 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opDEC_0x2D,   4,       0,	 1    },  // DEC L
 	{ opLD_0x2E,    8,       0,	 2    },  // LD L, d8
 	{ opCPL_0x2F,   4,       0,	 1    },  // CPL
-	{ opLD_0x31,   12,      0,	 3    },  // LD SP, n16
-	{ opLD_0x32,   8,       0,	 1    },  // LD (HL-), A
-	{ opLD_0x36,   12,      0,	 2    },  // LD (HL), n8 
+	{ opLD_0x31,   12,       0,	 3    },  // LD SP, n16
+	{ opLD_0x32,    8,       0,	 1    },  // LD (HL-), A
+	{ opLD_0x36,   12,       0,	 2    },  // LD (HL), n8 
+	{ opLD_0x3A,   	8,       0,	 1    },  // LD A, (HL-) 
+	{ opLD_0x3E,    8,       0,	 2    },  // LD A, n8 
 };
 
 /*
