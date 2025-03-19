@@ -931,6 +931,44 @@ void opLD_0x32(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Increment instruction (0x33): INC SP
+ * @details Increments value in SP
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opINC_0x33(gameBoy_t* gb)
+{
+	gb->sp++;
+}
+
+/*
+ * @brief Op code function for Increment instruction (0x34): INC (HL)
+ * @details Increment value pointed to by register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 12 cycles to execute
+ * @note Affects flags: Z, N, H
+ */
+void opINC_0x34(gameBoy_t* gb)
+{
+	gbINC_r8(gb, &gb->memory[gb->generalReg.hl]);
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x35): DEC (HL)
+ * @details Decrement value pointed to by register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 12 cycles to execute
+ * @note Affects flags: Z, N, H
+ */
+void opDEC_0x35(gameBoy_t* gb)
+{
+	gbDEC_r8(gb, &gb->memory[gb->generalReg.hl]);
+}
+
+/*
  * @brief Op code function for Load instruction (0x36): LD (HL), n8
  * @details Copies value n8 into address pointed to by register HL
  * @param Pointer to gb struct containing registers
@@ -955,6 +993,44 @@ void opLD_0x3A(gameBoy_t* gb)
 	uint8_t value = gb->memory[gb->generalReg.hl];
 	gb->generalReg.a = value;
 	gb->generalReg.hl--;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x3B): DEC SP
+ * @details Decrement value pointed to by register HL
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 8 cycles to execute
+ */
+void opDEC_0x3B(gameBoy_t* gb)
+{
+	gb->sp--;
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x3C): INC A
+ * @details Increment value of register A
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects flags: Z, N, H
+ */
+void opINC_0x3C(gameBoy_t* gb)
+{
+	gbINC_r8(gb, &gb->generalReg.a);
+}
+
+/*
+ * @brief Op code function for Decrement instruction (0x3D): DEC A
+ * @details Decrement value of register A
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 byte long and requires 4 cycles to execute
+ * @note Affects flags: Z, N, H
+ */
+void opDEC_0x3D(gameBoy_t* gb)
+{
+	gbDEC_r8(gb, &gb->generalReg.a);
 }
 
 /*
@@ -1027,8 +1103,14 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opCPL_0x2F,   4,       0,	 1    },  // CPL
 	{ opLD_0x31,   12,       0,	 3    },  // LD SP, n16
 	{ opLD_0x32,    8,       0,	 1    },  // LD (HL-), A
+	{ opINC_0x33,   8,       0,	 1    },  // INC SP
+	{ opINC_0x34,  12,       0,	 1    },  // INC (HL)
+	{ opDEC_0x35,  12,       0,	 1    },  // DEC (HL)
 	{ opLD_0x36,   12,       0,	 2    },  // LD (HL), n8 
 	{ opLD_0x3A,   	8,       0,	 1    },  // LD A, (HL-) 
+	{ opDEC_0x3B,   8,       0,	 1    },  // DEC SP
+	{ opINC_0x3C,   4,       0,	 1    },  // INC A
+	{ opDEC_0x3D,   4,       0,	 1    },  // DEC A
 	{ opLD_0x3E,    8,       0,	 2    },  // LD A, n8 
 };
 
