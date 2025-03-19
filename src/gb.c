@@ -982,6 +982,24 @@ void opLD_0x36(gameBoy_t* gb)
 }
 
 /*
+ * @brief Op code function for Set Carry Flag instruction (0x37): SCF
+ * @details Sets Carry flag
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 bytes long and requires 4 cycles to execute
+ * @note Affects flags: H, C, N
+ */
+void opSCF_0x37(gameBoy_t* gb) 
+{
+	// Set C
+	gb->generalReg.f |= FLAG_REG_CARRY; 
+	// Set H
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY; 
+	// Set N
+	gb->generalReg.f &= ~FLAG_REG_SUB; 
+}
+
+/*
  * @brief Op code function for Load instruction (0x3A): LD A, (HL-)
  * @details Loads the value pointed to by register HL to register A. HL is then decremented
  * @param Pointer to gb struct containing registers
@@ -997,7 +1015,7 @@ void opLD_0x3A(gameBoy_t* gb)
 
 /*
  * @brief Op code function for Decrement instruction (0x3B): DEC SP
- * @details Decrement value pointed to by register HL
+ * @details Decrement value of SP
  * @param Pointer to gb struct containing registers
  * @return void
  * @note This instruction is 1 byte long and requires 8 cycles to execute
@@ -1044,6 +1062,32 @@ void opLD_0x3E(gameBoy_t* gb)
 {
 	uint8_t value = gb->memory[gb->pc + 1];
 	gb->generalReg.a = value;
+}
+
+/*
+ * @brief Op code function for Complement Carry Flag instruction (0x3F): CCF
+ * @details Complements Carry flag
+ * @param Pointer to gb struct containing registers
+ * @return void
+ * @note This instruction is 1 bytes long and requires 4 cycles to execute
+ * @note Affects flags: H, C, N
+ */
+void opCCF_0x3F(gameBoy_t* gb) 
+{
+	// Complement C
+	if(gb->generalReg.f & FLAG_REG_CARRY)
+	{
+		gb->generalReg.f &= ~FLAG_REG_CARRY; 
+	}
+	else
+	{
+		gb->generalReg.f |= FLAG_REG_CARRY; 
+	}
+
+	// Set H
+	gb->generalReg.f &= ~FLAG_REG_HALF_CARRY; 
+	// Set N
+	gb->generalReg.f &= ~FLAG_REG_SUB; 
 }
 
 /*
@@ -1107,13 +1151,14 @@ struct gbInstruction gbDispatchTable[GB_NUM_OF_OPCODES] =
 	{ opINC_0x34,  12,       0,	 1    },  // INC (HL)
 	{ opDEC_0x35,  12,       0,	 1    },  // DEC (HL)
 	{ opLD_0x36,   12,       0,	 2    },  // LD (HL), n8 
+	{ opSCF_0x37,   4,       0,	 1    },  // SCF
 	{ opLD_0x3A,   	8,       0,	 1    },  // LD A, (HL-) 
 	{ opDEC_0x3B,   8,       0,	 1    },  // DEC SP
 	{ opINC_0x3C,   4,       0,	 1    },  // INC A
 	{ opDEC_0x3D,   4,       0,	 1    },  // DEC A
 	{ opLD_0x3E,    8,       0,	 2    },  // LD A, n8 
+	{ opCCF_0x3F,   4,       0,	 1    },  // CCF
 };
-
 /*
  * @brief Function for handling the emulator's dispatch process (fetching, decoding, executing)
  * @details Uses a function/dispatch table to minimize time complexity by mapping each function pointer's index to their 
